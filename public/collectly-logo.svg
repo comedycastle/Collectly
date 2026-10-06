@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 56" fill="none">
+  <defs>
+    <!-- Background Gradient for Icon -->
+    <linearGradient id="full-logo-bg" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1E3A8A" />
+      <stop offset="50%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <!-- Card Gradient -->
+    <linearGradient id="full-logo-card" x1="10" y1="10" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95" />
+      <stop offset="100%" stop-color="#E0F2FE" stop-opacity="0.85" />
+    </linearGradient>
+
+    <!-- Text Gradient for "ly" -->
+    <linearGradient id="full-logo-text-grad" x1="160" y1="20" x2="210" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <!-- AI Spark Gradient -->
+    <linearGradient id="full-logo-spark" x1="36" y1="6" x2="48" y2="18" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE047" />
+      <stop offset="100%" stop-color="#22D3EE" />
+    </linearGradient>
+
+    <filter id="full-logo-shadow" x="0" y="0" width="56" height="56" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#2563EB" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- ICON EMBLEM (48x48) positioned at x=4, y=4 -->
+  <g transform="translate(4, 4)">
+    <!-- Base Squircle -->
+    <rect width="48" height="48" rx="14" fill="url(#full-logo-bg)" filter="url(#full-logo-shadow)" />
+    <rect width="46" height="46" x="1" y="1" rx="13" stroke="white" stroke-opacity="0.2" stroke-width="1" />
+
+    <!-- Back Sheet Layer -->
+    <path d="M12 15C12 12.7909 13.7909 11 16 11H29C30.6569 11 32 12.3431 32 14V16H14C12.8954 16 12 15.1046 12 14V15Z" fill="white" fill-opacity="0.3" />
+
+    <!-- Foreground Interactive Form Card -->
+    <rect x="11" y="15" width="26" height="23" rx="5" fill="url(#full-logo-card)" />
+
+    <!-- Form Title Bar -->
+    <rect x="14.5" y="18.5" width="9" height="2.5" rx="1.25" fill="#2563EB" />
+
+    <!-- Field 1 with Checkbox/Node -->
+    <circle cx="16" cy="25" r="1.5" fill="#06B6D4" />
+    <rect x="19.5" y="24" width="13.5" height="2" rx="1" fill="#94A3B8" />
+
+    <!-- Field 2 -->
+    <circle cx="16" cy="30.5" r="1.5" fill="#3B82F6" />
+    <rect x="19.5" y="29.5" width="9.5" height="2" rx="1" fill="#CBD5E1" />
+
+    <!-- Geometric "C" Flow loop -->
+    <path d="M33 19C35.2091 19 37 20.7909 37 23V30C37 32.2091 35.2091 34 33 34H30" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" />
+
+    <!-- Dynamic AI Sparkle -->
+    <path d="M36 10C36 12.7614 37.2386 14 40 14C37.2386 14 36 15.2386 36 18C36 15.2386 34.7614 14 32 14C34.7614 14 36 12.7614 36 10Z" fill="url(#full-logo-spark)" />
+    <circle cx="36" cy="14" r="1" fill="#FFFFFF" />
+  </g>
+
+  <!-- TYPOGRAPHY WORDMARK -->
+  <g transform="translate(64, 34)">
+    <!-- "Collect" in solid bold navy/slate -->
+    <text font-family="'Poppins', system-ui, -apple-system, sans-serif" font-size="24" font-weight="800" letter-spacing="-0.5" fill="#0F172A">
+      Collect<tspan fill="url(#full-logo-text-grad)">ly</tspan>
+    </text>
+  </g>
+
+  <!-- SUBTITLE / TAGLINE -->
+  <g transform="translate(65, 47)">
+    <text font-family="'Poppins', system-ui, -apple-system, sans-serif" font-size="8.5" font-weight="600" letter-spacing="1.2" fill="#64748B">
+      AI FORMS &amp; SURVEYS
+    </text>
+  </g>
+</svg>

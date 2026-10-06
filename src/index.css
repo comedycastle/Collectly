@@ -1,0 +1,282 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --brand-primary: #2563EB;
+    --brand-accent: #06B6D4;
+  }
+
+  body {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Dark mode surface remapping (toggled via documentElement.classList) */
+  .dark body {
+    background-color: #0F172A;
+    color: #F8FAFC;
+  }
+
+  .dark .bg-brand-bg {
+    background-color: #0F172A !important;
+  }
+
+  .dark .bg-brand-surface {
+    background-color: #1E293B !important;
+  }
+
+  .dark .text-brand-text {
+    color: #F8FAFC !important;
+  }
+
+  .dark .text-brand-muted {
+    color: #94A3B8 !important;
+  }
+
+  .dark .border-brand-border {
+    border-color: #334155 !important;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    background: #0F172A;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #475569;
+  }
+
+  /* Accent bridging: global primary/accent follow user-picked CSS vars */
+  .bg-brand-primary {
+    background-color: var(--brand-primary) !important;
+  }
+
+  .text-brand-primary {
+    color: var(--brand-primary) !important;
+  }
+
+  .bg-brand-accent {
+    background-color: var(--brand-accent) !important;
+  }
+
+  .text-brand-accent {
+    color: var(--brand-accent) !important;
+  }
+
+  /* Accessibility focus outline: Accent color #06B6D4 with 3px outline */
+  *:focus-visible {
+    outline: 3px solid #06B6D4 !important;
+    outline-offset: 2px !important;
+  }
+
+  /* WCAG AA Contrast for text */
+  .text-brand-text {
+    color: #0F172A;
+  }
+
+  .bg-brand-bg {
+    background-color: #F8FAFC;
+  }
+
+  .bg-brand-surface {
+    background-color: #FFFFFF;
+  }
+
+  .border-brand-border {
+    border-color: #E2E8F0;
+  }
+
+  .text-brand-muted {
+    color: #64748B;
+  }
+
+  .bg-brand-primary {
+    background-color: #2563EB;
+  }
+
+  .text-brand-primary {
+    color: #2563EB;
+  }
+
+  .bg-brand-accent {
+    background-color: #06B6D4;
+  }
+
+  .text-brand-accent {
+    color: #06B6D4;
+  }
+
+  .bg-brand-secondary {
+    background-color: #64748B;
+  }
+
+  .text-brand-secondary {
+    color: #64748B;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F8FAFC;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.glass-card {
+  background: #FFFFFF;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #E2E8F0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(37, 99, 235, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Form field input styles */
+.form-input {
+  @apply w-full px-4 py-2.5 bg-brand-bg border border-brand-border rounded-xl text-sm text-brand-text placeholder-brand-muted/50 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all;
+}
+
+.form-textarea {
+  @apply w-full p-4 bg-brand-bg border border-brand-border rounded-xl text-sm text-brand-text placeholder-brand-muted/50 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all resize-none;
+}
+
+.form-label {
+  @apply block text-sm font-semibold text-brand-text mb-1.5;
+}
+
+.form-select {
+  @apply w-full px-4 py-2.5 bg-brand-bg border border-brand-border rounded-xl text-sm text-brand-text focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all;
+}
+
+/* Button styles */
+.btn-primary {
+  @apply px-5 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-sm shadow-glow hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-brand-primary/30;
+}
+
+.btn-secondary {
+  @apply px-5 py-2.5 rounded-xl bg-brand-surfaceLight hover:bg-brand-border text-brand-text font-semibold text-sm border border-brand-border transition-colors focus:outline-none focus:ring-2 focus:ring-brand-secondary/30;
+}
+
+.btn-ghost {
+  @apply px-4 py-2 rounded-xl text-brand-muted hover:text-brand-text hover:bg-brand-surfaceLight transition-colors focus:outline-none focus:ring-2 focus:ring-brand-accent/30;
+}
+
+.btn-gradient {
+  @apply px-6 py-3 rounded-xl bg-brand-gradient text-white font-bold text-sm shadow-glow hover:opacity-90 transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent/30;
+}
+
+/* Card styles */
+.card {
+  @apply bg-brand-surface border border-brand-border rounded-2xl shadow-card transition-all;
+}
+
+.card-hover {
+  @apply hover:border-brand-primary/50 hover:-translate-y-1 hover:shadow-glow;
+}
+
+/* Badge styles */
+.badge {
+  @apply px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider;
+}
+
+.badge-primary {
+  @apply bg-brand-primary/10 text-brand-primary border border-brand-primary/20;
+}
+
+.badge-accent {
+  @apply bg-brand-accent/10 text-brand-accent border border-brand-accent/20;
+}
+
+.badge-success {
+  @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/30;
+}
+
+.badge-warning {
+  @apply bg-amber-500/10 text-amber-400 border border-amber-500/30;
+}
+
+.badge-error {
+  @apply bg-red-500/10 text-red-400 border border-red-500/30;
+}
+
+/* Animation utilities */
+.animate-in {
+  animation: animateIn 0.3s ease-out forwards;
+}
+
+@keyframes animateIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.zoom-in-95 {
+  animation: zoomIn 0.2s ease-out forwards;
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
