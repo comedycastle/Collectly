@@ -194,9 +194,10 @@ export const TemplatesPage: React.FC<Props> = ({ onTemplateSelect, onOpenAIGener
                                     <div className="text-xs">
                                         <span className="font-bold text-brand-accent mr-2">Q{i + 1}</span>
                                         <span className="font-semibold">{f.label}</span>
-                                        <span className="ml-2 px-1.5 py-0.5 rounded bg-brand-primary/10 text-brand-primary text-[10px] font-bold">{f.type}</span>
                                         {f.required && <span className="ml-1 text-[10px] text-red-500 font-bold">required</span>}
-                                        {f.points ? <span className="ml-1 text-[10px] text-amber-600 font-bold">{f.points} pts</span> : null}
+                                        {previewTpl.isQuiz && Boolean(f.points && f.points > 0) && (f.type.startsWith('quiz') || f.options?.some((o: any) => o.isCorrect)) ? (
+                                            <span className="ml-1 text-[10px] text-amber-600 font-bold">+{f.points} pts</span>
+                                        ) : null}
                                     </div>
                                     {(f.options || []).length > 0 && (
                                         <div className="mt-1.5 flex flex-wrap gap-1.5">

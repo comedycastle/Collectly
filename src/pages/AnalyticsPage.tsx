@@ -1,10 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { BarChart3, Monitor, Globe, Sparkles, CheckCircle2, Clock, Users, Download, RefreshCw, GitBranch, Star, ShieldAlert } from 'lucide-react';
+import {
+    BarChart3, Monitor, Globe, Sparkles, CheckCircle2, Clock, Users, Download,
+    RefreshCw, GitBranch, Star, ShieldAlert, Bot, ThumbsUp, ThumbsDown, Lightbulb, MessageSquare
+} from 'lucide-react';
 import {
     ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
     BarChart, Bar, Cell, PieChart, Pie, Legend, LineChart, Line, FunnelChart, Funnel, LabelList,
 } from 'recharts';
 import { useCollectlyStore } from '../store/useCollectlyStore';
+import { synthesizeSentimentWithAI, AISentimentSynthesis } from '../services/aiService';
 
 const PRIMARY = '#2563EB';
 const ACCENT = '#06B6D4';
@@ -28,6 +32,12 @@ export const AnalyticsPage: React.FC = () => {
     const [section, setSection] = useState<'overview' | 'audience' | 'questions' | 'sentiment' | 'quiz'>('overview');
     const [refreshing, setRefreshing] = useState(false);
     const [events, setEvents] = useState<any[]>([]);
+    const [sentimentAiData, setSentimentAiData] = useState<AISentimentSynthesis | null>(null);
+    const [isAnalyzingSentiment, setIsAnalyzingSentiment] = useState(false);
+
+    useEffect(() => {
+        setSentimentAiData(null);
+    }, [selectedFormId, timeRange]);
 
     useEffect(() => {
         loadResponsesFromSupabase(selectedFormId === 'all' ? undefined : selectedFormId);
@@ -80,6 +90,40 @@ export const AnalyticsPage: React.FC = () => {
         const flagged = filteredResponses.filter(r => r.tags.some((t: string) => t.toLowerCase().includes('flag') || t.toLowerCase().includes('tab-switch'))).length;
         return { total, positive, negative, neutral, avgTime, passed, failed, flagged };
     }, [filteredResponses]);
+
+    const handleTriggerAISentiment = async () => {
+        if (isAnalyzingSentiment) return;
+        setIsAnalyzingSentiment(true);
+        try {
+            const comments: string[] = [];
+            filteredResponses.forEach((r) => {
+                if (r.answers) {
+                    Object.values(r.answers).forEach((ans: any) => {
+                        if (ans && typeof ans.value === 'string' && ans.value.trim().length > 3) {
+                            comments.push(ans.value.trim());
+                        }
+                    });
+                }
+            });
+
+            const formTitle = selectedForm ? selectedForm.title : 'All Forms Combined';
+            const aiResult = await synthesizeSentimentWithAI(
+                formTitle,
+                comments,
+                {
+                    total: stats.total,
+                    positive: stats.positive,
+                    neutral: stats.neutral,
+                    negative: stats.negative,
+                }
+            );
+            setSentimentAiData(aiResult);
+        } catch (err) {
+            console.error('Failed to analyze sentiment with AI:', err);
+        } finally {
+            setIsAnalyzingSentiment(false);
+        }
+    };
 
     // Timeline (per day, last N)
     const timeline = useMemo(() => {
@@ -557,36 +601,198 @@ export const AnalyticsPage: React.FC = () => {
                     )}
 
                     {section === 'sentiment' && (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-                            <Card title="Sentiment Split" subtitle={`${stats.total} analyzed responses`}>
-                                {sentimentData.length ? (
-                                    <ResponsiveContainer width="100%" height={240}>
-                                        <PieChart>
-                                            <Pie data={sentimentData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={3}>
-                                                {sentimentData.map((s) => <Cell key={s.name} fill={s.color} />)}
-                                            </Pie>
-                                            <Tooltip contentStyle={tooltipStyle} />
-                                            <Legend wrapperStyle={{ fontSize: 12 }} />
-                                        </PieChart>
-                                    </ResponsiveContainer>
-                                ) : <p className="text-xs text-brand-muted text-center py-10">No sentiment data yet.</p>}
-                            </Card>
-                            <Card title="Sentiment Trend" subtitle="Positive vs negative over time">
-                                {sentimentTrend.length ? (
-                                    <ResponsiveContainer width="100%" height={240}>
-                                        <LineChart data={sentimentTrend} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
-                                            <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke={SLATE} />
-                                            <YAxis allowDecimals={false} tick={{ fontSize: 10 }} stroke={SLATE} />
-                                            <Tooltip contentStyle={tooltipStyle} />
-                                            <Legend wrapperStyle={{ fontSize: 11 }} />
-                                            <Line type="monotone" dataKey="positive" name="Positive" stroke={EMERALD} strokeWidth={2.5} dot={false} />
-                                            <Line type="monotone" dataKey="neutral" name="Neutral" stroke={SLATE} strokeWidth={2} dot={false} />
-                                            <Line type="monotone" dataKey="negative" name="Negative" stroke={RED} strokeWidth={2.5} dot={false} />
-                                        </LineChart>
-                                    </ResponsiveContainer>
-                                ) : <p className="text-xs text-brand-muted text-center py-10">Not enough data for a trend yet.</p>}
-                            </Card>
+                        <div className="space-y-5">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                                <Card title="Sentiment Split" subtitle={`${stats.total} analyzed responses`}>
+                                    {sentimentData.length ? (
+                                        <ResponsiveContainer width="100%" height={240}>
+                                            <PieChart>
+                                                <Pie data={sentimentData} dataKey="value" nameKey="name" innerRadius={60} outerRadius={95} paddingAngle={3}>
+                                                    {sentimentData.map((s) => <Cell key={s.name} fill={s.color} />)}
+                                                </Pie>
+                                                <Tooltip contentStyle={tooltipStyle} />
+                                                <Legend wrapperStyle={{ fontSize: 12 }} />
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                    ) : <p className="text-xs text-brand-muted text-center py-10">No sentiment data yet.</p>}
+                                </Card>
+                                <Card title="Sentiment Trend" subtitle="Positive vs negative over time">
+                                    {sentimentTrend.length ? (
+                                        <ResponsiveContainer width="100%" height={240}>
+                                            <LineChart data={sentimentTrend} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                                                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke={SLATE} />
+                                                <YAxis allowDecimals={false} tick={{ fontSize: 10 }} stroke={SLATE} />
+                                                <Tooltip contentStyle={tooltipStyle} />
+                                                <Legend wrapperStyle={{ fontSize: 11 }} />
+                                                <Line type="monotone" dataKey="positive" name="Positive" stroke={EMERALD} strokeWidth={2.5} dot={false} />
+                                                <Line type="monotone" dataKey="neutral" name="Neutral" stroke={SLATE} strokeWidth={2} dot={false} />
+                                                <Line type="monotone" dataKey="negative" name="Negative" stroke={RED} strokeWidth={2.5} dot={false} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    ) : <p className="text-xs text-brand-muted text-center py-10">Not enough data for a trend yet.</p>}
+                                </Card>
+                            </div>
+
+                            {/* AI Qualitative Sentiment Synthesis */}
+                            <div className="p-6 rounded-2xl bg-brand-surface border border-brand-border shadow-card">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-brand-border/60">
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-accent flex items-center justify-center text-white shadow-sm">
+                                            <Sparkles className="w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-sm font-bold text-brand-text">AI Qualitative Sentiment Synthesis</h3>
+                                                {sentimentAiData?.providerUsed && (
+                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-primary/10 text-brand-primary border border-brand-primary/20">
+                                                        {sentimentAiData.providerUsed}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-[11px] text-brand-muted mt-0.5">
+                                                On-demand AI clustering and actionable feedback • Cached for 5 minutes to prevent redundant API calls
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={handleTriggerAISentiment}
+                                        disabled={isAnalyzingSentiment || filteredResponses.length === 0}
+                                        className="px-4 py-2 rounded-xl bg-brand-primary text-white text-xs font-semibold hover:bg-brand-primary-hover active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                                    >
+                                        <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzingSentiment ? 'animate-spin' : ''}`} />
+                                        {isAnalyzingSentiment ? 'Synthesizing...' : sentimentAiData ? 'Re-run AI Synthesis' : 'Analyze with AI'}
+                                    </button>
+                                </div>
+
+                                {!sentimentAiData && !isAnalyzingSentiment && (
+                                    <div className="py-10 text-center space-y-3">
+                                        <div className="w-12 h-12 rounded-2xl bg-brand-bg border border-brand-border flex items-center justify-center mx-auto text-brand-muted">
+                                            <Bot className="w-6 h-6 text-brand-primary" />
+                                        </div>
+                                        <div className="max-w-md mx-auto">
+                                            <h4 className="text-xs font-bold text-brand-text">Deep Qualitative Understanding</h4>
+                                            <p className="text-[11px] text-brand-muted mt-1 leading-relaxed">
+                                                Click "Analyze with AI" to summarize participant comments into major themes, top customer praises, key pain points, and concrete improvements.
+                                            </p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {isAnalyzingSentiment && (
+                                    <div className="py-12 text-center space-y-3 animate-pulse">
+                                        <div className="w-10 h-10 rounded-full bg-brand-primary/10 text-brand-primary flex items-center justify-center mx-auto">
+                                            <Sparkles className="w-5 h-5 animate-spin" />
+                                        </div>
+                                        <p className="text-xs font-medium text-brand-text">Analyzing user feedback with AI engine...</p>
+                                        <p className="text-[11px] text-brand-muted">Clustering sentiment patterns and generating recommendations</p>
+                                    </div>
+                                )}
+
+                                {sentimentAiData && !isAnalyzingSentiment && (
+                                    <div className="mt-5 space-y-5">
+                                        {/* Executive Summary */}
+                                        <div className="p-4 rounded-xl bg-brand-bg border border-brand-border/80">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primary">Executive Summary</span>
+                                            <p className="text-xs text-brand-text font-medium mt-1 leading-relaxed">
+                                                {sentimentAiData.summary}
+                                            </p>
+                                        </div>
+
+                                        {/* Key Themes */}
+                                        {sentimentAiData.keyThemes?.length > 0 && (
+                                            <div>
+                                                <h4 className="text-xs font-bold text-brand-text flex items-center gap-1.5 mb-2.5">
+                                                    <MessageSquare className="w-3.5 h-3.5 text-brand-primary" />
+                                                    Prominent Themes Identified
+                                                </h4>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {sentimentAiData.keyThemes.map((item, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border ${
+                                                                item.sentiment === 'positive'
+                                                                    ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40'
+                                                                    : item.sentiment === 'negative'
+                                                                    ? 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/40'
+                                                                    : 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                                                            }`}
+                                                        >
+                                                            <span>{item.theme}</span>
+                                                            {item.count > 0 && (
+                                                                <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-white/70 dark:bg-black/30 font-bold">
+                                                                    {item.count}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Praises & Complaints 2-col */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Praises */}
+                                            <div className="p-4 rounded-xl bg-emerald-50/40 dark:bg-emerald-950/20 border border-emerald-200/60 dark:border-emerald-800/30">
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 mb-2.5">
+                                                    <ThumbsUp className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                                    Top Praises & Highlights
+                                                </div>
+                                                {sentimentAiData.topPraises?.length ? (
+                                                    <ul className="space-y-1.5">
+                                                        {sentimentAiData.topPraises.map((p, idx) => (
+                                                            <li key={idx} className="text-[11px] text-brand-text flex items-start gap-2">
+                                                                <span className="text-emerald-500 font-bold shrink-0">•</span>
+                                                                <span>{p}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <p className="text-[11px] text-brand-muted">No explicit praise items extracted yet.</p>
+                                                )}
+                                            </div>
+
+                                            {/* Complaints / Friction */}
+                                            <div className="p-4 rounded-xl bg-rose-50/40 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-800/30">
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-rose-700 dark:text-rose-300 mb-2.5">
+                                                    <ThumbsDown className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                                                    Areas of Friction / Complaints
+                                                </div>
+                                                {sentimentAiData.topComplaints?.length ? (
+                                                    <ul className="space-y-1.5">
+                                                        {sentimentAiData.topComplaints.map((c, idx) => (
+                                                            <li key={idx} className="text-[11px] text-brand-text flex items-start gap-2">
+                                                                <span className="text-rose-500 font-bold shrink-0">•</span>
+                                                                <span>{c}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                ) : (
+                                                    <p className="text-[11px] text-brand-muted">No major complaints detected.</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Actionable Suggestions */}
+                                        {sentimentAiData.actionableSuggestions?.length > 0 && (
+                                            <div className="p-4 rounded-xl bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/30">
+                                                <div className="flex items-center gap-1.5 text-xs font-bold text-amber-700 dark:text-amber-300 mb-2">
+                                                    <Lightbulb className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                                                    AI Actionable Recommendations
+                                                </div>
+                                                <ul className="space-y-1.5">
+                                                    {sentimentAiData.actionableSuggestions.map((s, idx) => (
+                                                        <li key={idx} className="text-[11px] text-brand-text flex items-start gap-2">
+                                                            <span className="text-amber-500 font-bold shrink-0">→</span>
+                                                            <span>{s}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
 

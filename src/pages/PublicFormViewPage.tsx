@@ -736,7 +736,11 @@ export const PublicFormViewPage: React.FC<Props> = ({ formId, onBackToDashboard 
                                                     <span className="text-brand-accent">Q{globalIndex + 1}.</span> {field.label}
                                                     {field.required && <span className="text-red-400 text-xs">*</span>}
                                                 </label>
-                                                {field.points && <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">+{field.points} pts</span>}
+                                                {form.isQuiz && Boolean(field.points && field.points > 0) && (field.type.startsWith('quiz_') || field.options?.some(o => o.isCorrect)) && (
+                                                    <span className="text-[10px] font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded">
+                                                        +{field.points} pts
+                                                    </span>
+                                                )}
                                             </div>
                                         )}
 
